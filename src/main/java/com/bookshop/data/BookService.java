@@ -1,31 +1,19 @@
 package com.bookshop.data;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.util.List;
 
 @Service
 public class BookService {
-
-    private final JdbcTemplate jdbcTemplate;
-
-    public BookService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private final BookRepository bookRepository;
+    @Autowired
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
     public List<Book> getBookData() {
-        return jdbcTemplate.query(
-                "SELECT * FROM books",
-                (ResultSet resultSet, int rowNumber) -> {
-            Book book = new Book();
-            book.setId(resultSet.getInt("id"));
-            book.setAuthor(resultSet.getString("author_id"));
-            book.setTitle(resultSet.getString("title"));
-            book.setPriceOld(resultSet.getString("price_old"));
-            book.setPrice(resultSet.getString("price"));
-            return book;
-        });
+        return bookRepository.findAll();
     }
 }

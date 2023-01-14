@@ -1,36 +1,25 @@
 package com.bookshop.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class AuthorService {
-    private final JdbcTemplate jdbcTemplate;
+    private final AuthorRepository authorRepository;
     @Autowired
-    public AuthorService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public AuthorService(AuthorRepository authorRepository) {
+        this.authorRepository = authorRepository;
     }
 
     public Map<String,List<Author>> getAuthorsData() {
-        return jdbcTemplate.query(
-            "SELECT * FROM authors ORDER BY last_name",
-            (ResultSet resultSet, int rowNumber) ->
-                {
-                    Author author = new Author();
-                    author.setId(resultSet.getInt("id"));
-                    author.setFirstName(resultSet.getString("first_name"));
-                    author.setLastName(resultSet.getString("last_name"));
-                    return author;
-                }
-            ).stream()
-                .collect(Collectors.groupingBy(
-                        author -> String.valueOf(author.getLastName().charAt(0)))
+        return authorRepository.findAll(Sort.by(Sort.Direction.ASC, "lastName"))
+                .stream().collect(Collectors.groupingBy(
+                author -> String.valueOf(author.getLastName().charAt(0)))
                 );
     }
 }
